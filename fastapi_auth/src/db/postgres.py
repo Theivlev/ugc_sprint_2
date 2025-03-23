@@ -8,6 +8,8 @@ from redis import asyncio as aioredis
 from sqlalchemy import UUID, MetaData
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import Mapped, declarative_base, declared_attr, mapped_column, sessionmaker
+from alembic import command
+from alembic.config import Config
 from src.core.config import postgres_settings, project_settings
 
 instance_id = os.getenv("HOSTNAME", "unknown_instance")
@@ -53,6 +55,10 @@ async def create_database(redis_client: aioredis.Redis, max_wait_time: int = 300
                 async with engine.begin() as conn:
                     await conn.run_sync(Base.metadata.create_all)
                 logger.info("Таблицы успешно созданы")
+
+                alembic_cfg = Config("alembic.ini")
+                alembic_cfg.set_main_option('sqlalchemy.url', postgres_settings.dsn)
+                await asyncio.to_thread(command.upgrade, alembic_cfg, 'head')
             except Exception as e:
                 logger.error(f"Ошибка при создании таблиц: {e}")
                 raise

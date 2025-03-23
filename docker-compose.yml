@@ -13,8 +13,6 @@ services:
       - theatre-db
       - elasticsearch
       - redis
-    networks:
-      - movies-net
 
   fastapi1:
     build:
@@ -31,9 +29,6 @@ services:
       - theatre-db
       - jaeger
       - kafka-0
-    networks:
-      - movies-net
-      - movies-net-outside
 
   fastapi2:
     build:
@@ -50,9 +45,6 @@ services:
       - theatre-db
       - jaeger
       - kafka-0
-    networks:
-      - movies-net
-      - movies-net-outside
 
   fastapi_auth1:
     build:
@@ -69,28 +61,22 @@ services:
       - theatre-db
       - jaeger
       - kafka-0
-    networks:
-      - movies-net
-      - movies-net-outside
 
-  # fastapi_auth2:
-  #   build:
-  #     context: ./fastapi_auth
-  #     dockerfile: Dockerfile
-  #   container_name: authapi_2
-  #   ports:
-  #     - "8071:8070"
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     - etl
-  #     - redis
-  #     - theatre-db
-  #     - jaeger
-      # - kafka-0
-  #   networks:
-  #     - movies-net
-        # - movies-net-outside
+  fastapi_auth2:
+    build:
+      context: ./fastapi_auth
+      dockerfile: Dockerfile
+    container_name: authapi_2
+    ports:
+      - "8071:8070"
+    env_file:
+      - .env
+    depends_on:
+      - etl
+      - redis
+      - theatre-db
+      - jaeger
+      - kafka-0
 
   redis:
     image: redislabs/redismod:latest
@@ -100,8 +86,6 @@ services:
     restart: always
     volumes:
       - redis_data:/data
-    networks:
-      - movies-net
 
   elasticsearch:
     image: elasticsearch:8.7.0
@@ -117,8 +101,6 @@ services:
       - theatre-db
     ports:
       - "9200:9200"
-    networks:
-      - movies-net
 
   nginx:
     image: nginx:latest
@@ -131,12 +113,8 @@ services:
       - fastapi1
       - fastapi2
       - fastapi_auth1
-      # - fastapi_auth2
     ports:
       - "80:80"
-    networks:
-      - movies-net
-      - movies-net-outside
 
   theatre-db:
     image: postgres:16
@@ -149,8 +127,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - movies-net
 
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -158,8 +134,6 @@ services:
     ports:
       - "14268:14268"
       - "16686:16686"
-    networks:
-      - movies-net
 
   kafka-0:
     image: bitnami/kafka:3.4
@@ -174,9 +148,6 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-0:9092,EXTERNAL://127.0.0.1:9094
     volumes:
       - kafka_0_data:/bitnami/kafka
-    networks:
-      - movies-net
-
 
   kafka-1:
     image: bitnami/kafka:3.4
@@ -191,8 +162,6 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-1:9092,EXTERNAL://127.0.0.1:9095
     volumes:
       - kafka_1_data:/bitnami/kafka
-    networks:
-      - movies-net
 
   kafka-2:
     image: bitnami/kafka:3.4
@@ -207,8 +176,6 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-2:9092,EXTERNAL://127.0.0.1:9096
     volumes:
       - kafka_2_data:/bitnami/kafka
-    networks:
-      - movies-net
 
   kafka-ui:
     image: provectuslabs/kafka-ui:v0.7.0
@@ -218,8 +185,6 @@ services:
     environment:
       - KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS=kafka-0:9092
       - KAFKA_CLUSTERS_0_NAME=kraft
-    networks:
-      - movies-net
 
   rabbitmq:
     image: rabbitmq:4.0.7-management
@@ -229,8 +194,6 @@ services:
       - "15672:15672"
     env_file:
       - .env
-    networks:
-      - movies-net
 
   flask:
     build:
@@ -241,17 +204,6 @@ services:
       - "5000:5000"
     env_file:
       - .env
-    networks:
-      - movies-net
-      - movies-net-outside
-
-networks:
-  movies-net:
-    driver: bridge
-
-  movies-net-outside:
-    driver: bridge
-    internal: false
 
 volumes:
   postgres_data:
