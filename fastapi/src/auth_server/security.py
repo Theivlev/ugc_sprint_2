@@ -1,12 +1,13 @@
 from functools import lru_cache
 from typing import Optional
-from fastapi import status, HTTPException, Depends
-from fastapi.params import Security
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
+from fastapi.params import Security
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from src.auth_server.abc.abstract_auth_client import AbstractAuthClient
 from src.auth_server.grpc.grpc_client import GRPCAuthClient
 from src.auth_server.schemas.models import TokenPayload, TokenValidationResult
-from src.auth_server.abc.abstract_auth_client import AbstractAuthClient
+
+from fastapi import Depends, HTTPException, status
 
 security_scheme = HTTPBearer(auto_error=False)
 
@@ -41,8 +42,7 @@ async def require_valid_token(
 
     if not validation_result.is_valid:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Token invalid: {validation_result.error_message}"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Token invalid: {validation_result.error_message}"
         )
 
     return validation_result

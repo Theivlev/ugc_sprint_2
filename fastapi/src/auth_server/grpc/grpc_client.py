@@ -3,15 +3,12 @@ import logging
 import grpc
 import src.auth_server.grpc.auth_pb2 as auth_pb2
 import src.auth_server.grpc.auth_pb2_grpc as auth_pb2_grpc
-
 from src.auth_server.abc.abstract_auth_client import AbstractAuthClient
-from src.auth_server.schemas.models import TokenValidationResult, TokenPayload
-
+from src.auth_server.schemas.models import TokenPayload, TokenValidationResult
 from src.core.config import project_settings
 
 
 class GRPCAuthClient(AbstractAuthClient):
-
     def __init__(self, host: str = project_settings.auth_grpc_host, port: int = project_settings.auth_grpc_port):
         self.target = f"{host}:{port}"
 
