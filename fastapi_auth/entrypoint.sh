@@ -27,4 +27,4 @@ echo "Running Alembic migrations..."
 
 # alembic upgrade head
 
-exec uvicorn src.main:app --reload --host 0.0.0.0 --port 8070
+exec uvicorn src.main:app --reload --host $UVICORN_HOST --port $UVICORN_PORT_AUTH

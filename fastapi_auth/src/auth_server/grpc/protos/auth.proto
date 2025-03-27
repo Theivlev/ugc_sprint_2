@@ -21,4 +21,3 @@ message CheckTokenResponse {
   bool is_subscribed = 4;     // whether the user is subscribed
   string error_message = 5;   // error message if token is invalid
 }
-

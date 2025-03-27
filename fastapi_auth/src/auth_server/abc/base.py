@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-import jwt
-from jwt import InvalidTokenError, ExpiredSignatureError
 
-from src.core.config import auth_settings
+import jwt
+from jwt import ExpiredSignatureError, InvalidTokenError
 from src.auth_server.schemas.models import CheckTokenResult
+from src.core.config import auth_settings
 
 
 class AbstractAuthServer(ABC):
@@ -60,4 +60,5 @@ class BaseAuthService(AbstractJWTService, AbstractAuthServer):
     Basic class: knows how to check the token and run the server.
     Specific implementations can add GRPC/HTTP handlers.
     """
+
     pass

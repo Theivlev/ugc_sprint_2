@@ -44,4 +44,4 @@ class AuthHistory(Base):
     user_device_type: Mapped[str] = mapped_column(nullable=False, primary_key=True)
     timestamp: Mapped[datetime] = mapped_column(default=datetime.now, nullable=False)
 
-    user: Mapped["User"] = relationship("User", back_populates="auth_history")
+    user: Mapped["User"] = relationship("User", back_populates="auth_history")  # noqa

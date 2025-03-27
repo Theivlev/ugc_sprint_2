@@ -1,15 +1,14 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Query, Request, Response
 from fastapi_cache.decorator import cache
-from fastapi import Security
 from opentelemetry import trace
 from opentelemetry.trace import SpanKind
-
 from src.auth_server.schemas.models import TokenValidationResult
+from src.auth_server.security import require_valid_token
 from src.models.film import MovieBaseDTO, MovieInfoDTO
 from src.services.film_service import FilmService, get_film_service
-from src.auth_server.security import require_valid_token
+
+from fastapi import APIRouter, Depends, Path, Query, Request, Response, Security
 
 router = APIRouter()
 tracer = trace.get_tracer(__name__)

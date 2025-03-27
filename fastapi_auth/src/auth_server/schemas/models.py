@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field
+from typing import Dict, List
 
-from typing import List, Dict
+from pydantic import BaseModel, Field
 
 
 class CheckTokenResult(BaseModel):

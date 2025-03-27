@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.auth_server.schemas.models import TokenValidationResult, TokenPayload
+from src.auth_server.schemas.models import TokenPayload, TokenValidationResult
 
 
 class AbstractAuthClient(ABC):
