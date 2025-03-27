@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     kafka_brokers: list[str]
     clickhouse_nodes: list[str]
 
-    servers: str
+    bootstrap_servers: str
     group_id: str
     topic: str
     partitions: int
