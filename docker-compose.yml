@@ -222,6 +222,7 @@ services:
       - KAFKA_CREATE_TOPICS=movies:3:3
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
       - KAFKA_CFG_MAX_MESSAGE_BYTES=52428800
+      - KAFKA_CFG_DEFAULT_REPLICATION_FACTOR=3
    
     volumes:
       - kafka_0_data:/bitnami/kafka
