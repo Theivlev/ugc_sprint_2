@@ -16,15 +16,7 @@ logging.basicConfig(
 
 @backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10)
 async def run_etl(writer: ClickHouseWriter, batch_size: int = 10):
-    """
-    Основной процесс ETL: чтение из Kafka, трансформация данных и запись в ClickHouse.
-    """
-    reader = KafkaReader()
-
-    async with reader.connect() as reader:
-
-        reader: KafkaReader
-
+    async with KafkaReader() as reader:
         transformer = MessagesTransformer()
 
         try:
@@ -38,7 +30,6 @@ async def run_etl(writer: ClickHouseWriter, batch_size: int = 10):
                     continue
 
                 await writer.write(transformed_messages)
-
                 await reader.commit()
                 logging.info(f"Успешно записано {len(transformed_messages)} сообщений в ClickHouse.")
 
@@ -49,19 +40,15 @@ async def run_etl(writer: ClickHouseWriter, batch_size: int = 10):
 
 
 async def main():
-    """
-    Основная точка входа для запуска ETL-процесса.
-    """
-    writer = ClickHouseWriter()
-    async with writer.connect() as writer:
-        while True:
-            try:
-                logging.info("Запуск ETL-процесса...")
+    while True:
+        try:
+            logging.info("Запуск ETL-процесса...")
+            async with ClickHouseWriter() as writer:
                 await run_etl(writer)
-            except Exception as e:
-                logging.error(f"Ошибка в ETL-процессе: {e}")
-                logging.info("Повторная попытка через 5 секунд...")
-                await asyncio.sleep(5)
+        except Exception as e:
+            logging.error(f"Ошибка в ETL-процессе: {e}")
+            logging.info("Повторная попытка через 5 секунд...")
+            await asyncio.sleep(5)
 
 
 if __name__ == "__main__":

@@ -1,8 +1,9 @@
+import logging
+
 from aiochclient import ChClient
 from aiohttp import ClientSession
 
 from dataclasses import dataclass
-from contextlib import asynccontextmanager
 from typing import List
 from core.config import settings
 from core.base import BaseWriter
@@ -12,36 +13,27 @@ from .query import QueryBuilder
 
 @dataclass
 class ClickHouseWriter(BaseWriter):
-    """Реализация записи данных в ClickHouse."""
     session: ClientSession = None
     client: ChClient = None
     query_builder: QueryBuilder = QueryBuilder()
 
-    @asynccontextmanager
-    async def connect(self):
-        """
-        Асинхронный контекстный менеджер для управления соединением с ClickHouse.
-        """
-        try:
-            self.session = ClientSession()
-            self.client = ChClient(self.session, settings.clickhouse_nodes[0])
-            yield self
-        except Exception as e:
+    async def __aenter__(self):
+        self.session = ClientSession()
+        self.client = ChClient(self.session, settings.clickhouse_nodes[0])
+        return self
 
-            raise e
-        finally:
-            if self.session:
-                await self.session.close()
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if self.session:
+            await self.session.close()
 
     async def write(self, rows: List[MessageDTO]):
-        """
-        Запись данных в ClickHouse.
-        """
         try:
             query = self.query_builder.build_insert_query(
                 table_name='data_analytics.event_table',
                 model_class=MessageDTO
             )
             await self.client.execute(query, *rows)
+            logging.info("Данные успешно записаны в ClickHouse.")
         except Exception as e:
-            raise e
+            logging.error(f"Ошибка при записи данных в ClickHouse: {e}")
+            raise

@@ -1,7 +1,6 @@
 import abc
 from typing import AsyncGenerator, List
 from aiokafka import ConsumerRecord
-from contextlib import asynccontextmanager
 
 
 class BaseMessageReader(abc.ABC):
@@ -18,9 +17,13 @@ class BaseMessageReader(abc.ABC):
         pass
 
     @abc.abstractmethod
-    @asynccontextmanager
-    async def connect(self):
-        """Управление соединением с брокером."""
+    async def __aenter__(self):
+        """Вход в асинхронный контекстный менеджер."""
+        pass
+
+    @abc.abstractmethod
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Выход из асинхронного контекстного менеджера."""
         pass
 
 
@@ -35,9 +38,13 @@ class BaseWriter(abc.ABC):
         pass
 
     @abc.abstractmethod
-    @asynccontextmanager
-    async def connect(self):
-        """Управление соединением с бд."""
+    async def __aenter__(self):
+        """Вход в асинхронный контекстный менеджер."""
+        pass
+
+    @abc.abstractmethod
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Выход из асинхронного контекстного менеджера."""
         pass
 
 
