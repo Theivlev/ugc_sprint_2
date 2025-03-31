@@ -19,7 +19,9 @@ async def run_etl(writer: ClickHouseWriter, batch_size: int = 10):
     """
     Основной процесс ETL: чтение из Kafka, трансформация данных и запись в ClickHouse.
     """
-    async with KafkaReader() as reader:
+    reader = KafkaReader()
+
+    async with reader.connect() as reader:
 
         reader: KafkaReader
 
@@ -50,7 +52,8 @@ async def main():
     """
     Основная точка входа для запуска ETL-процесса.
     """
-    async with ClickHouseWriter() as writer:
+    writer = ClickHouseWriter()
+    async with writer.connect() as writer:
         while True:
             try:
                 logging.info("Запуск ETL-процесса...")

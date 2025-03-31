@@ -45,6 +45,6 @@ class BaseMessageTranformer(abc.ABC):
     """Абстрактный базовый класс для трансформации сообщений."""
 
     @abc.abstractmethod
-    async def transoform(self, messages: List[ConsumerRecord]) -> AsyncGenerator[tuple, None]:
+    async def transform(self, messages: List[ConsumerRecord]) -> AsyncGenerator[tuple, None]:
         """Асинхронный метод для трансформации сообщений."""
         pass
