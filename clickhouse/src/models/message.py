@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from uuid import UUID
 
-from src.models.mixins import UUIDMixin
+from models.mixins import UUIDMixin
 
 
 class MessageDTO(UUIDMixin):
