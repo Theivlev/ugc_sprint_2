@@ -36,4 +36,4 @@ CREATE TABLE IF NOT EXISTS default.event_table (
     timestamp Int64,
     event_data String,
     event_time DateTime
-) ENGINE = Distributed('company_cluster', 'data_analytics', 'event_table_shard{h}', user_id);
+) ENGINE = Distributed('company_cluster', 'data_analytics', 'event_table_shard{h}', cityHash64(user_id));
