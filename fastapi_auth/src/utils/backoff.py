@@ -2,6 +2,7 @@ import logging
 import time
 from functools import wraps
 
+from aiormq import AMQPConnectionError
 from kafka.errors import NoBrokersAvailable as KafkaError
 from redis.exceptions import ConnectionError as RedisError
 
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def backoff(
-    error_connection: type[RedisError | KafkaError],
+    error_connection: type[RedisError | KafkaError | AMQPConnectionError],
     start_sleep_time: float = 0.1,
     factor: int = 2,
     border_sleep_time: int = 10,

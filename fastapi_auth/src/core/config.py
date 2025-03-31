@@ -150,19 +150,15 @@ class JaegerSettings(BaseSettings):
         self.dsn = f"http://{self.host_name}:{self.port}/{self.endpoint}"
 
 
-class KafkaSettings(BaseSettings):
-    """Настройки Kafka."""
+class RabbitMQSettings(BaseSettings):
+    """Настройки RabbitMQ."""
 
     host: str
+    user: str
+    password: str
     port: int
-    dsn: str
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore", env_prefix="KAFKA_")
-
-    def model_post_init(self, __context):
-        """Формируем DSN после загрузки переменных."""
-
-        self.dsn = f"{self.host}:{self.port}"
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore", env_prefix="RABBITMQ_")
 
 
 project_settings = ProjectSettings()  # type: ignore
@@ -172,4 +168,4 @@ auth_settings = AuthSettings()  # type: ignore
 yandex_settings = YandexSettings()  # type: ignore
 vk_settings = VkSettings()  # type: ignore
 jaeger_settings = JaegerSettings()  # type: ignore
-kafka_settings = KafkaSettings()  # type: ignore
+rabbit_settings = RabbitMQSettings()  # type: ignore
