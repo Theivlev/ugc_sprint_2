@@ -27,8 +27,8 @@ class MessageDTO(UUIDMixin):
             event_data = message['value'].decode('utf-8')
             timestamp = datetime.fromtimestamp(message['timestamp'] / 1000)
 
-            user_id = str(user_id) if isinstance(user_id, UUID) else user_id
-            movie_id = str(movie_id) if isinstance(movie_id, UUID) else movie_id
+            user_id = UUID(user_id) if isinstance(user_id, str) else user_id
+            movie_id = UUID(movie_id) if isinstance(movie_id, str) else movie_id
 
             return cls(
                 user_id=user_id,

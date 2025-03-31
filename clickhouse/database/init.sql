@@ -1,11 +1,10 @@
-
 CREATE DATABASE IF NOT EXISTS data_analytics;
 
 
 CREATE TABLE IF NOT EXISTS data_analytics.event_table_shard1 (
-    id String,
-    user_id String,
-    movie_id String,
+    id UUID,
+    user_id UUID,
+    movie_id UUID,
     action String,
     timestamp Int64,
     event_data String,
@@ -16,9 +15,9 @@ CREATE TABLE IF NOT EXISTS data_analytics.event_table_shard1 (
 
 
 CREATE TABLE IF NOT EXISTS data_analytics.event_table_shard2 (
-    id String,
-    user_id String,
-    movie_id String,
+    id UUID,
+    user_id UUID,
+    movie_id UUID,
     action String,
     timestamp Int64,
     event_data String,
@@ -29,9 +28,9 @@ CREATE TABLE IF NOT EXISTS data_analytics.event_table_shard2 (
 
 
 CREATE TABLE IF NOT EXISTS default.event_table (
-    id String,
-    user_id String,
-    movie_id String,
+    id UUID,
+    user_id UUID,
+    movie_id UUID,
     action String,
     timestamp Int64,
     event_data String,
