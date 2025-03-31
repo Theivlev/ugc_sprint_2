@@ -7,10 +7,34 @@ from .logger import LOGGING_CONFIG
 logging_config.dictConfig(LOGGING_CONFIG)
 
 
-class ProjectSettings(BaseSettings):
-    """Данные проекта"""
+class Nginx(BaseSettings):
+    """Настройки Nginx."""
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    host: str
+    dsn: str
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore", env_prefix="NGINX_")
+
+    def model_post_init(self, __context):
+        """Формируем DSN после загрузки переменных."""
+
+        self.dsn = f"http://{self.host}"
 
 
-project_settings = ProjectSettings()  # type: ignore
+class KafkaSettings(BaseSettings):
+    """Настройки Kafka."""
+
+    host: str
+    port: int
+    dsn: str
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore", env_prefix="KAFKA_")
+
+    def model_post_init(self, __context):
+        """Формируем DSN после загрузки переменных."""
+
+        self.dsn = f"{self.host}:{self.port}"
+
+
+nginx = Nginx()  # type: ignore
+kafka_settings = KafkaSettings()  # type: ignore
