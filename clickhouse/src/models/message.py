@@ -11,7 +11,7 @@ class MessageDTO(UUIDMixin):
     movie_id: str | UUID | None = None
     action: str
     event_data: str
-    timestamp: datetime
+    event_time: datetime
 
     @classmethod
     def from_kafka_message(cls, message: dict) -> 'MessageDTO':
@@ -25,7 +25,6 @@ class MessageDTO(UUIDMixin):
             movie_id = deсode_value.get('movie_id')
             action = message['key'].decode('utf-8')
             event_data = message['value'].decode('utf-8')
-            timestamp = datetime.fromtimestamp(message['timestamp'] / 1000)
 
             user_id = UUID(user_id) if isinstance(user_id, str) else user_id
             movie_id = UUID(movie_id) if isinstance(movie_id, str) else movie_id
@@ -35,7 +34,6 @@ class MessageDTO(UUIDMixin):
                 movie_id=movie_id,
                 action=action,
                 event_data=event_data,
-                timestamp=timestamp
             )
         except (json.JSONDecodeError, ValueError, KeyError) as e:
             raise ValueError(f"Ошибка создание MessageDTO: {e}")

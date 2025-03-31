@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS data_analytics.event_table_shard1 (
     user_id UUID,
     movie_id UUID,
     action String,
-    timestamp Int64,
     event_data String,
     event_time DateTime
 ) ENGINE = ReplicatedMergeTree('/clickhouse/tables/shard1/event_table', '{replica}')
@@ -19,7 +18,6 @@ CREATE TABLE IF NOT EXISTS data_analytics.event_table_shard2 (
     user_id UUID,
     movie_id UUID,
     action String,
-    timestamp Int64,
     event_data String,
     event_time DateTime
 ) ENGINE = ReplicatedMergeTree('/clickhouse/tables/shard2/event_table', '{replica}')
@@ -32,7 +30,6 @@ CREATE TABLE IF NOT EXISTS default.event_table (
     user_id UUID,
     movie_id UUID,
     action String,
-    timestamp Int64,
     event_data String,
     event_time DateTime
 ) ENGINE = Distributed('company_cluster', 'data_analytics', 'event_table_shard{h}', cityHash64(user_id));
