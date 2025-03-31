@@ -38,48 +38,35 @@
         <company_cluster>
             <shard>
                 <replica>
-                    <default_database>data_analytics</default_database>
                     <host>clickhouse-node1</host>
                     <port>9000</port>
                 </replica>
                 <replica>
-                    <default_database>replica</default_database>
                     <host>clickhouse-node2</host>
                     <port>9000</port>
                 </replica>
             </shard>
             <shard>
                 <replica>
-                    <default_database>data_analytics</default_database>
                     <host>clickhouse-node3</host>
                     <port>9000</port>
                 </replica>
                 <replica>
-                    <default_database>replica</default_database>
                     <host>clickhouse-node4</host>
                     <port>9000</port>
                 </replica>
             </shard>
         </company_cluster>
     </remote_servers>
-
     <zookeeper>
-        <node index="1">
+        <node>
             <host>zookeeper</host>
             <port>2181</port>
         </node>
     </zookeeper>
-
     <macros>
         <cluster>company_cluster</cluster>
         <shard>2</shard>
         <replica>clickhouse-node4</replica>
     </macros>
-
-    <distributed_ddl>
-        <path>/clickhouse/task_queue/ddl</path>
-        <pool>default</pool>
-    </distributed_ddl>
-
-    <format_schema_path>/var/lib/clickhouse/format_schemas/</format_schema_path>
 </company>
