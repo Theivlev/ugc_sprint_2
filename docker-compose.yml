@@ -208,9 +208,6 @@ services:
 
   kafka-0:
     image: bitnami/kafka:3.4
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
     ports:
       - "9094:9094"
     environment:
