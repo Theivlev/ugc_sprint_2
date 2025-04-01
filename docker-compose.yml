@@ -208,9 +208,6 @@ services:
 
   kafka-0:
     image: bitnami/kafka:3.4
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.dev
     ports:
       - "9094:9094"
     environment:
@@ -225,35 +222,13 @@ services:
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-0:9092,EXTERNAL://127.0.0.1:9094
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      - KAFKA_CREATE_TOPICS=movies:3:3
-      - KAFKA_CFG_MAX_MESSAGE_BYTES=52428800
+      - KAFKA_CREATE_TOPICS=moviesPAMAGITE:3:3
+      - KAFKA_CFG_NUM_PARTITIONS=3
       - KAFKA_CFG_DEFAULT_REPLICATION_FACTOR=3
+      - KAFKA_CFG_MAX_MESSAGE_BYTES=52428800
 
     volumes:
       - kafka_0_data:/bitnami/kafka
-    # command: >
-    #   bash -c '
-    #     ls -l /opt/bitnami/kafka/config/;
-    #     echo "Waiting for all controllers to be ready...";
-    #     brokers="kafka-0:9093 kafka-1:9093 kafka-2:9093";
-    #     for broker in $brokers; do
-    #         echo "Processing broker: $broker";
-    #         IFS=":" read -r host port <<< "$broker";
-    #         echo "Parsed host: $host, port: $port";
-    #         if [ -z "$host" ] || [ -z "$port" ]; then
-    #             echo "Error: Failed to parse host or port from broker string: $broker";
-    #             exit 1;
-    #         fi;
-    #         echo "Checking broker: $host:$port";
-    #         until nc -z -v -w5 "$host" "$port"; do
-    #             echo "Waiting for $host:$port to be available...";
-    #             sleep 5;
-    #         done;
-    #         echo "$broker is available";
-    #     done;
-    #     echo "All controllers are ready, starting Kafka...";
-    #     /opt/bitnami/kafka/bin/kafka-server-start.sh /opt/bitnami/kafka/config/server.properties
-    #   '
     depends_on:
     - kafka-1
     - kafka-2
@@ -277,6 +252,8 @@ services:
 
     volumes:
       - kafka_1_data:/bitnami/kafka
+    depends_on:
+    - kafka-2
 
   kafka-2:
     image: bitnami/kafka:3.4
