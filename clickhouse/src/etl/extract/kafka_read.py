@@ -41,8 +41,8 @@ class KafkaReader(BaseMessageReader):
         try:
             logging.info("Начинаю цикл...")
             async for message in self.consumer:
-                logging.info(f"Получено сообщение: {message.value}")
-                messages.append(message.value)
+                logging.info(f"Получено сообщение: {message}")
+                messages.append(message)
 
                 if len(messages) >= batch_size:
                     logging.info(f"Достигнут размер batch: {batch_size}. Передача сообщений в обработку.")
