@@ -161,6 +161,22 @@ class RabbitMQSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", env_prefix="RABBITMQ_")
 
 
+class SentrySettings(BaseSettings):
+    """Настройки Sentry."""
+
+    host: str
+    port: int
+    key: str
+    dsn: str
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore", env_prefix="SDK_SENTRY_")
+
+    def model_post_init(self, __context):
+        """Формируем DSN после загрузки переменных."""
+
+        self.dsn = f"http://{self.key}@{self.host}:{self.port}/1"
+
+
 project_settings = ProjectSettings()  # type: ignore
 redis_settings = RedisSettings()  # type: ignore
 postgres_settings = PostgresSettings()  # type: ignore
@@ -169,3 +185,4 @@ yandex_settings = YandexSettings()  # type: ignore
 vk_settings = VkSettings()  # type: ignore
 jaeger_settings = JaegerSettings()  # type: ignore
 rabbit_settings = RabbitMQSettings()  # type: ignore
+sentry_settings = SentrySettings()  # type: ignore

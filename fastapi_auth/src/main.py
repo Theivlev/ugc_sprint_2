@@ -1,18 +1,22 @@
 import asyncio
 from contextlib import asynccontextmanager
 
+import sentry_sdk
 from fastapi.responses import ORJSONResponse
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from src.api.routers import main_router
 from src.auth_server.grpc.grpc_server import GRPCAuthService
-from src.core.config import jaeger_settings, project_settings, redis_settings
+from src.core.config import jaeger_settings, project_settings, redis_settings, sentry_settings
 from src.core.jaeger import configure_tracer
+from src.core.logger import request_id_var
 from src.db.init_postgres import create_first_superuser
 from src.db.postgres import create_database
 from src.db.rabbitmq import rabbitmq_producer
 from src.db.redis_cache import RedisCacheManager, RedisClientFactory
 
 from fastapi import FastAPI, Request, status
+
+sentry_sdk.init(dsn=sentry_settings.dsn, traces_sample_rate=1.0)
 
 
 @asynccontextmanager
@@ -59,8 +63,13 @@ if jaeger_settings.debug:
 
 @app.middleware("http")
 async def before_request(request: Request, call_next):
-    response = await call_next(request)
     request_id = request.headers.get("X-Request-Id")
     if not request_id:
         return ORJSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"detail": "X-Request-Id is required"})
-    return response
+    request_id_var.set(request_id)
+    try:
+        response = await call_next(request)
+        response.headers["X-Request-Id"] = request_id
+        return response
+    finally:
+        request_id_var.set(None)
