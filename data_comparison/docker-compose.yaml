@@ -1,0 +1,18 @@
+version: '3.9'
+services:
+  vertica:
+    image: jbfavre/vertica:latest
+    container_name: vertica
+    hostname: vertica
+    restart: always
+    ports:
+      - "5433:5433"
+
+  clickhouse:
+    image: yandex/clickhouse-server:latest
+    container_name: clickhouse
+    hostname: clickhouse
+    restart: always
+    ports:
+      - "8123:8123"
+      - "9000:9000"
