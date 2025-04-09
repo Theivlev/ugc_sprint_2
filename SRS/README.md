@@ -110,7 +110,7 @@ ETL-сервис отвечает за обработку данных из Kafk
 ### **1. Инструменты и технологии**
 - **Язык программирования**: Python.
 - **Брокер сообщений**: Rabbitmq, Apache Kafka.
-- **Хранилище данных**: ClickHouse.
+- **Хранилище данных**: Postgres, ClickHouse.
 - **Мониторинг**: Prometheus, Grafana.
 - **Логи**: ELK-стек (Elasticsearch, Logstash, Kibana).
 
