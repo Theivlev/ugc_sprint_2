@@ -7,7 +7,7 @@ for broker in $brokers; do
     echo "Обработка брокера: $broker..."
     IFS=":" read -r host port <<< "$broker"
     echo "Парсинг: хост - $host, порт - $port"
-    
+
     if [ -z "$host" ] || [ -z "$port" ]; then
         echo "Ошибка: не удалось распарсить строку брокера: $broker"
         exit 1
