@@ -8,14 +8,14 @@ services:
     ports:
       - "5433:5433"
 
-  # clickhouse:
-  #   image: yandex/clickhouse-server:latest
-  #   container_name: clickhouse
-  #   hostname: clickhouse
-  #   restart: always
-  #   ports:
-  #     - "8123:8123"
-  #     - "9000:9000"
+  clickhouse:
+    image: yandex/clickhouse-server:latest
+    container_name: clickhouse
+    hostname: clickhouse
+    restart: always
+    ports:
+      - "8123:8123"
+      - "9000:9000"
 
   vertica-script:
     build:
@@ -30,9 +30,9 @@ services:
     depends_on:
       - vertica
 
-  # clickhouse-script:
-  #   build:
-  #     context: ./clickhouse
-  #     dockerfile: Dockerfile
-  #   depends_on:
-  #     - clickhouse
+  clickhouse-script:
+    build:
+      context: ./clickhouse
+      dockerfile: Dockerfile
+    depends_on:
+      - clickhouse
