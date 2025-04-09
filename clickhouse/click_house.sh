@@ -21,8 +21,9 @@ for broker in $brokers; do
     echo "Брокер $broker доступен!"
 done
 
-echo "Все брокеры доступны. Ожидание 7 секунд перед запуском процесса ClickHouse ETL..."
-sleep 7
+echo "Все брокеры доступны. Ожидание 30 секунд ClickHouse ETL..."
+
+sleep 30
 
 echo "Запуск процесса ClickHouse ETL..."
 
