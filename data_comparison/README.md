@@ -1,0 +1,1 @@
+# Выбор хранилища (Clickhouse, Vertica)
