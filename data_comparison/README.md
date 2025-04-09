@@ -1,4 +1,4 @@
-# Выбор хранилища (Clickhouse, Vertica)# Clickhouse
+# Выбор хранилища (Clickhouse, Vertica)
 
 
 
