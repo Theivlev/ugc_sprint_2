@@ -291,10 +291,14 @@ services:
     image: rabbitmq:4.0.7-management
     container_name: rabbitmq
     ports:
-      - "5672:5672"
+      - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"
       - "15672:15672"
-    env_file:
-      - .env
+    env_file: .env
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
 
   flask:
     build:
@@ -305,6 +309,11 @@ services:
       - "5000:5000"
     env_file:
       - .env
+  mail-service:
+    build: ./mail
+    container_name: mail-service
+    env_file:
+      - .env
 
 volumes:
   postgres_data:
@@ -313,3 +322,4 @@ volumes:
   kafka_0_data:
   kafka_1_data:
   kafka_2_data:
+  rabbitmq_data:
