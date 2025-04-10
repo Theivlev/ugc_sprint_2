@@ -7,7 +7,7 @@ for broker in $brokers; do
     echo "Обработка брокера: $broker..."
     IFS=":" read -r host port <<< "$broker"
     echo "Парсинг: хост - $host, порт - $port"
-    
+
     if [ -z "$host" ] || [ -z "$port" ]; then
         echo "Ошибка: не удалось распарсить строку брокера: $broker"
         exit 1
@@ -21,8 +21,9 @@ for broker in $brokers; do
     echo "Брокер $broker доступен!"
 done
 
-echo "Все брокеры доступны. Ожидание 7 секунд перед запуском процесса ClickHouse ETL..."
-sleep 7
+echo "Все брокеры доступны. Ожидание 30 секунд ClickHouse ETL..."
+
+sleep 30
 
 echo "Запуск процесса ClickHouse ETL..."
 
