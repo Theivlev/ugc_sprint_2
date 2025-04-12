@@ -5,7 +5,6 @@ from etl.extract.kafka_read import KafkaReader
 from etl.load.clickhouse_writer import ClickHouseWriter
 from etl.transform.data_transform import MessagesTransformer
 from utils.backoff import backoff
-from utils.init_kafka import init_kafka
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -35,8 +34,6 @@ async def run_etl(writer: ClickHouseWriter, batch_size: int = 10):
 
 async def main():
     while True:
-        await init_kafka()
-        break
         try:
             logging.info("Запуск ETL-процесса...")
             async with ClickHouseWriter() as writer:
