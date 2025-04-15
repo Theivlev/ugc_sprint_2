@@ -2,22 +2,21 @@ import logging
 import time
 from functools import wraps
 
-from elasticsearch.exceptions import ConnectionError as ElasticsearchError
-from redis.exceptions import ConnectionError as RedisError
+from motor.motor_asyncio.errors import ConnectionFailure
 
 logger = logging.getLogger(__name__)
 
 
 def backoff(
-    error_connection: type[ElasticsearchError | RedisError],
+    error_connection: type[ConnectionFailure],
     start_sleep_time: float = 0.1,
     factor: int = 2,
     border_sleep_time: int = 10,
     max_attempts: int = 15,
 ):
     """
-    Функция для повторного выполнения подключения с ожиданием.
-    Если возникает ошибка
+    Функция для повторного выполнения подключения к MongoDB с ожиданием.
+    Если возникает ошибка ConnectionFailure, выполняется повторная попытка.
     """
 
     def func_wrapper(func: callable):
@@ -34,7 +33,7 @@ def backoff(
                     sleep_time = min(sleep_time * 2**factor, border_sleep_time)
 
                     logger.exception(
-                        'Ошибка подключения в функции "%s": %s. '
+                        'Ошибка подключения к MongoDB в функции "%s": %s. '
                         "Повторная попытка через %s секунд... (Попытка %d/%d)",
                         func.__name__,
                         error,
@@ -46,7 +45,8 @@ def backoff(
                     time.sleep(sleep_time)
 
             logger.error(
-                "Достигнуто максимальное количество " 'попыток в функции "%s". Функция завершилась с ошибкой.',
+                "Достигнуто максимальное количество "
+                'попыток подключения к MongoDB в функции "%s". Функция завершилась с ошибкой.',
                 func.__name__,
             )
             return None
