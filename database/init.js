@@ -1,9 +1,7 @@
-
 function log(level, message) {
     const timestamp = new Date().toISOString();
     print(`[${timestamp}] [${level}] ${message}`);
 }
-
 
 try {
     conn = new Mongo();
@@ -28,7 +26,6 @@ function createCollectionWithValidation(collectionName, validator) {
     }
 }
 
-
 function createUniqueIndex(collection, indexSpec, options) {
     try {
         collection.createIndex(indexSpec, options);
@@ -39,12 +36,11 @@ function createUniqueIndex(collection, indexSpec, options) {
     }
 }
 
-
 createCollectionWithValidation("user_likes", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["movie_id", "user_id", "liked_at"],
+            required: ["movie_id", "user_id", "liked_at", "rating"],
             properties: {
                 movie_id: {
                     bsonType: "objectId",
@@ -57,12 +53,17 @@ createCollectionWithValidation("user_likes", {
                 liked_at: {
                     bsonType: "date",
                     description: "Дата лайка"
+                },
+                rating: {
+                    bsonType: "int",
+                    minimum: 1,
+                    maximum: 10,
+                    description: "Оценка фильма (1-10)"
                 }
             }
         }
     }
 });
-
 
 createCollectionWithValidation("user_bookmarks", {
     validator: {
@@ -87,12 +88,11 @@ createCollectionWithValidation("user_bookmarks", {
     }
 });
 
-
 createCollectionWithValidation("user_reviews", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["movie_id", "user_id", "review_text", "rating", "reviewed_at"],
+            required: ["movie_id", "user_id", "review_text", "reviewed_at"],
             properties: {
                 movie_id: {
                     bsonType: "objectId",
@@ -106,12 +106,6 @@ createCollectionWithValidation("user_reviews", {
                     bsonType: "string",
                     description: "Текст отзыва"
                 },
-                rating: {
-                    bsonType: "int",
-                    minimum: 1,
-                    maximum: 10,
-                    description: "Оценка фильма (1-10)"
-                },
                 reviewed_at: {
                     bsonType: "date",
                     description: "Дата написания отзыва"
@@ -120,7 +114,6 @@ createCollectionWithValidation("user_reviews", {
         }
     }
 });
-
 
 createUniqueIndex(db.user_likes, { movie_id: 1, user_id: 1 }, { unique: true });
 createUniqueIndex(db.user_bookmarks, { movie_id: 1, user_id: 1 }, { unique: true });

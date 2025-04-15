@@ -10,5 +10,4 @@ class UserReviews(ObjectIdMixin):
     movie_id: PyObjectId
     user_id: PyObjectId
     review_text: str
-    rating: int = Field(..., ge=1, le=10)
     reviewed_at: datetime

@@ -9,4 +9,5 @@ class UserLike(ObjectIdMixin):
 
     movie_id: PyObjectId
     user_id: PyObjectId
+    rating: int = Field(..., ge=1, le=10)
     liked_at: datetime
