@@ -17,6 +17,23 @@ db.createCollection("user_bookmarks");
 db.createCollection("user_reviews");
 
 
-createUniqueIndex(db.user_likes, { movie_id: 1, user_id: 1 }, { unique: true });
-createUniqueIndex(db.user_bookmarks, { movie_id: 1, user_id: 1 }, { unique: true });
-createUniqueIndex(db.user_reviews, { movie_id: 1, user_id: 1 }, { unique: true });
+try {
+    db.user_likes.createIndex({ movie_id: 1, user_id: 1 }, { unique: true });
+    log("INFO", "Уникальный индекс для коллекции 'user_likes' успешно создан");
+} catch (error) {
+    log("ERROR", `Ошибка при создании индекса для коллекции 'user_likes': ${error}`);
+}
+
+try {
+    db.user_bookmarks.createIndex({ movie_id: 1, user_id: 1 }, { unique: true });
+    log("INFO", "Уникальный индекс для коллекции 'user_bookmarks' успешно создан");
+} catch (error) {
+    log("ERROR", `Ошибка при создании индекса для коллекции 'user_bookmarks': ${error}`);
+}
+
+try {
+    db.user_reviews.createIndex({ movie_id: 1, user_id: 1 }, { unique: true });
+    log("INFO", "Уникальный индекс для коллекции 'user_reviews' успешно создан");
+} catch (error) {
+    log("ERROR", `Ошибка при создании индекса для коллекции 'user_reviews': ${error}`);
+}
