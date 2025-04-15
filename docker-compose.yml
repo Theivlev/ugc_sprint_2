@@ -96,13 +96,13 @@ services:
     build:
       context: ./ugc_fastapi
       dockerfile: Dockerfile
+    container_name: ugc_fastapi
     env_file:
       - ./.env
-    container_name: ugc_fastapi
+    
     restart: unless-stopped
     depends_on:
-      ugc_mongo_db:
-        condition: service_healthy
+      - ugc_mongo_db
 
   redis:
     image: redislabs/redismod:latest
@@ -152,15 +152,15 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
 
-    ugc_mongo_db:
+  ugc_mongo_db:
       image: mongo
       env_file:
         - .env
       restart: always
       volumes:
-        - ./database/init.js:/docker-entrypoint-initdb.d
+        - ./mongo:/docker-entrypoint-initdb.d
       ports:
         - "27017:27017"
 
