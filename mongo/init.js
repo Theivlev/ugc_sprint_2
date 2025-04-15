@@ -1,6 +1,6 @@
 function log(level, message) {
     const timestamp = new Date().toISOString();
-    print(`[${timestamp}] [${level}] ${message}`);
+    console.log(`[${timestamp}] [${level}] ${message}`);
 }
 
 try {
