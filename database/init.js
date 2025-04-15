@@ -1,23 +1,29 @@
 
-try {
-    conn = new Mongo();
-    db = conn.getDB("ugc_movies");
-} catch (error) {
-    print(`Ошибка подключения к базе данных: ${error}`);
-    throw error;
+function log(level, message) {
+    const timestamp = new Date().toISOString();
+    print(`[${timestamp}] [${level}] ${message}`);
 }
 
 
+try {
+    conn = new Mongo();
+    db = conn.getDB("ugc_movies");
+    log("INFO", "Успешное подключение к базе данных 'ugc_movies'");
+} catch (error) {
+    log("ERROR", `Ошибка подключения к базе данных: ${error}`);
+    throw error;
+}
+
 function createCollectionWithValidation(collectionName, validator) {
     try {
-        if (!db.getCollectionNames().includes(collectionName)) {
+        if (!db.getCollectionInfos({ name: collectionName }).length) {
             db.createCollection(collectionName, { validator });
-            print(`Коллекция ${collectionName} успешно создана`);
+            log("INFO", `Коллекция '${collectionName}' успешно создана`);
         } else {
-            print(`Коллекция ${collectionName} уже существует`);
+            log("WARN", `Коллекция '${collectionName}' уже существует`);
         }
     } catch (error) {
-        print(`Ошибка при создании коллекции ${collectionName}: ${error}`);
+        log("ERROR", `Ошибка при создании коллекции '${collectionName}': ${error}`);
         throw error;
     }
 }
@@ -26,9 +32,9 @@ function createCollectionWithValidation(collectionName, validator) {
 function createUniqueIndex(collection, indexSpec, options) {
     try {
         collection.createIndex(indexSpec, options);
-        print(`Уникальный индекс для ${collection.getName()} успешно создан`);
+        log("INFO", `Уникальный индекс для коллекции '${collection.getName()}' успешно создан`);
     } catch (error) {
-        print(`Ошибка при создании индекса для ${collection.getName()}: ${error}`);
+        log("ERROR", `Ошибка при создании индекса для коллекции '${collection.getName()}': ${error}`);
         throw error;
     }
 }
