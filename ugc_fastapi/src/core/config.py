@@ -1,6 +1,7 @@
 from logging import config as logging_config
 
-from pydantic import BaseSettings, MongoDsn, SettingsConfigDict
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import MongoDsn
 
 from .logger import LOGGING_CONFIG
 
@@ -13,7 +14,6 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     project_name: str
-    project_name: str
     project_summary: str
     project_version: str
     project_terms_of_service: str
@@ -25,4 +25,4 @@ class Settings(BaseSettings):
     auth_grpc_port: int
 
 
-settings = Settings()
+project_settings = Settings()
