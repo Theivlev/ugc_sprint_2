@@ -1,6 +1,6 @@
 
 try {
-    conn = new Mongo("mongodb://localhost:27017"); // Укажите ваш URI, если нужно
+    conn = new Mongo();
     db = conn.getDB("ugc_movies");
 } catch (error) {
     print(`Ошибка подключения к базе данных: ${error}`);
