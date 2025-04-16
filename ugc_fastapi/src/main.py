@@ -1,23 +1,22 @@
-from fastapi import FastAPI
-from fastapi.responses import ORJSONResponse
 from contextlib import asynccontextmanager
-from motor.motor_asyncio import AsyncIOMotorClient
 
+from fastapi.responses import ORJSONResponse
+from motor.motor_asyncio import AsyncIOMotorClient
+from src.api.v1.bookmarks import router as bookmarks_router
 from src.core.config import project_settings
 
-from src.api.v1.bookmarks import router as bookmarks_router
-
+from fastapi import FastAPI
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-
     app.state.client = AsyncIOMotorClient(str(project_settings.mongo_dsn))
     app.state.db = app.state.client[project_settings.mongo_db]
     try:
         yield
     finally:
         await app.state.client.close()
+
 
 app = FastAPI(
     title=project_settings.project_name,

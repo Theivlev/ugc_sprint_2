@@ -1,73 +1,58 @@
 from typing import List
-from bson import ObjectId
+
 from pymongo.errors import DuplicateKeyError
-from src.shemas.user_bookmarks import UserBookmarkCreateDTO, UserBookmarkUpdateDTO  # noqa
 from src.crud.base import BaseMongoCRUD
 from src.models.bookmark import UserBookmarks
-from src.services.bookmarks import get_user_bookmark_service
+from src.services.bookmarks import get_crud_service
+from src.shemas.user_bookmarks import UserBookmarkCreateDTO, UserBookmarkResponse
+from src.utils.check_bookmark import validate_bookmark_exists
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 router = APIRouter()
 
 
-@router.get("/", response_model=List[UserBookmarks])
+@router.get("/", response_model=List[UserBookmarkResponse])
 async def get_bookmarks_films(
     user_id: str,
     page_number: int = Query(0, ge=0, description="Номер страницы"),
     page_size: int = Query(10, ge=1, le=100, description="Размер страницы"),
-    service: BaseMongoCRUD = Depends(get_user_bookmark_service),
+    service: BaseMongoCRUD = Depends(get_crud_service),
 ):
     """
     Получить список фильмов в закладках пользователя.
     """
-    try:
-        if not ObjectId.is_valid(user_id):
-            raise HTTPException(status_code=400, detail="Некорректный ID пользователя")
+    filter_ = {"user_id": user_id}
+    bookmarks = await service.find(filter_, page_number, page_size)
+    return [
+        UserBookmarkResponse(
+            id=str(bookmark.id),
+            movie_id=str(bookmark.movie_id),
+            user_id=str(bookmark.user_id),
+            bookmarked_at=bookmark.bookmarked_at,
+        )
+        for bookmark in bookmarks
+    ]
 
-        filter_ = {"user_id": ObjectId(user_id)}
-        bookmarks = await service.find(filter_, page_number, page_size)
-        return bookmarks
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
-
-@router.post("/", response_model=UserBookmarks)
+@router.post("/", response_model=None)
 async def add_bookmarks_films(
     bookmark_data: UserBookmarkCreateDTO,
-    service: BaseMongoCRUD = Depends(get_user_bookmark_service),
+    service: BaseMongoCRUD = Depends(get_crud_service),
 ):
-    """
-    Добавить фильм в закладки пользователя.
-    """
     try:
-        if not ObjectId.is_valid(bookmark_data.movie_id) or not ObjectId.is_valid(bookmark_data.user_id):
-            raise HTTPException(status_code=400, detail="Некорректный ID фильма или пользователя")
-
-        new_bookmark = await service.create(bookmark_data)
+        new_bookmark = await service.create(bookmark_data.model_dump(by_alias=True))
         return new_bookmark
     except DuplicateKeyError:
         raise HTTPException(status_code=400, detail="Закладка уже существует")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
 
 @router.delete("/{bookmark_id}", response_model=dict)
 async def remove_bookmark(
-    bookmark_id: str,
-    service: BaseMongoCRUD = Depends(get_user_bookmark_service),
+    bookmark: UserBookmarks = Depends(validate_bookmark_exists),
+    service: BaseMongoCRUD = Depends(get_crud_service),
 ):
-    """
-    Удалить фильм из закладок пользователя.
-    """
-    try:
-        if not ObjectId.is_valid(bookmark_id):
-            raise HTTPException(status_code=400, detail="Некорректный ID закладки")
-
-        is_deleted = await service.delete(bookmark_id)
-        if not is_deleted:
-            raise HTTPException(status_code=404, detail="Закладка не найдена")
-
-        return {"message": "Закладка успешно удалена"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
+    success = await service.delete(str(bookmark.id))
+    if not success:
+        raise HTTPException(status_code=404, detail="Закладка не найдена")
+    return {"message": "Закладка успешно удалена"}
