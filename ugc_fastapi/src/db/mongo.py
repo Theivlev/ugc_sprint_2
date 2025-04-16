@@ -3,7 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
 
 async def get_mongo_db() -> AsyncIOMotorDatabase:
-    client = AsyncIOMotorClient(project_settings.mongo_dsn)
+    client = AsyncIOMotorClient(str(project_settings.mongo_dsn))
     try:
         yield client[project_settings.mongo_db]
     finally:
