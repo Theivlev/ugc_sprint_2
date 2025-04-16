@@ -5,6 +5,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from src.api.v1.bookmarks import router as bookmarks_router
 from src.core.config import project_settings
 from src.db.mongo import init_db
+
 from fastapi import FastAPI
 
 

@@ -1,7 +1,8 @@
-from fastapi import HTTPException
 from src.crud.base import BaseMongoCRUD
-from fastapi import Depends
 from src.services.bookmarks import get_crud_service
+
+from fastapi import Depends, HTTPException
+
 
 async def validate_bookmark_exists(bookmark_id: str, service: BaseMongoCRUD = Depends(get_crud_service)):
     bookmark = await service.get(bookmark_id)

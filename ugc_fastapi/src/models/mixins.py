@@ -1,12 +1,14 @@
+from typing import Any
+
 from bson import ObjectId
 from pydantic_core import core_schema
-from typing import Any
 
 
 class PyObjectId(ObjectId):
     """
     Пользовательский тип для MongoDB ObjectId, совместимый с Pydantic v2.
     """
+
     @classmethod
     def __get_pydantic_core_schema__(cls, source: Any, handler: Any) -> core_schema.CoreSchema:
         """
