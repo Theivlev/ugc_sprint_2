@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from mixin import ObjectIdMixin, PyObjectId
-from pydantic import Field
 
 
 class UserBookmarks(ObjectIdMixin):
