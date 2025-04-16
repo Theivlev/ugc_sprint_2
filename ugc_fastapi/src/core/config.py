@@ -1,7 +1,7 @@
 from logging import config as logging_config
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import MongoDsn
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .logger import LOGGING_CONFIG
 

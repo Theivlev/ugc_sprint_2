@@ -1,8 +1,8 @@
-from typing import Generic, TypeVar, Optional, List, Type
+from typing import Generic, List, Optional, Type, TypeVar
+
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorCollection
 from pydantic import BaseModel
-
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from mixin import ObjectIdMixin, PyObjectId
+from src.models.mixin import ObjectIdMixin, PyObjectId
 
 
 class UserBookmarks(ObjectIdMixin):
