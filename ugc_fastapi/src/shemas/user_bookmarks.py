@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from pydantic import BaseModel, Field, validator
 from src.models.dto import AbstractDTO
@@ -18,7 +18,7 @@ class UserBookmarkCreateDTO(AbstractDTO):
 
     @validator("bookmarked_at")
     def validate_bookmarked_at(cls, value):
-        if value > datetime.now():
+        if value > datetime.now(timezone.utc):
             raise ValueError("Дата создания не может быть изменена в будущем")
         return value
 

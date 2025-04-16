@@ -1,10 +1,11 @@
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from beanie import init_beanie
+from motor.motor_asyncio import AsyncIOMotorClient
+from src.models.bookmark import UserBookmarks
 from src.core.config import project_settings
 
-
-async def get_mongo_db() -> AsyncIOMotorDatabase:
+async def init_db():
+    """
+    Инициализация Beanie с MongoDB.
+    """
     client = AsyncIOMotorClient(str(project_settings.mongo_dsn))
-    try:
-        yield client[project_settings.mongo_db]
-    finally:
-        client.close()
+    await init_beanie(database=client[project_settings.mongo_db], document_models=[UserBookmarks])
