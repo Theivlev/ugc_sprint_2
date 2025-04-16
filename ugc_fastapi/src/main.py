@@ -4,7 +4,7 @@ from fastapi.responses import ORJSONResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from src.api.v1.bookmarks import router as bookmarks_router
 from src.core.config import project_settings
-
+from src.db.mongo import init_db
 from fastapi import FastAPI
 
 
@@ -12,6 +12,8 @@ from fastapi import FastAPI
 async def lifespan(app: FastAPI):
     app.state.client = AsyncIOMotorClient(str(project_settings.mongo_dsn))
     app.state.db = app.state.client[project_settings.mongo_db]
+
+    await init_db(app.state.db)
     try:
         yield
     finally:
