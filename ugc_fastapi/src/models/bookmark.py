@@ -1,5 +1,5 @@
-from datetime import datetime
-from typing import List
+from datetime import datetime, timezone
+from uuid import UUID
 
 from beanie import Document
 from pydantic import Field
@@ -12,13 +12,9 @@ class UserBookmarks(Document):
     """
 
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    movie_id: PyObjectId
-    user_id: PyObjectId
-    bookmarked_at: datetime = Field(default_factory=datetime.now)
+    movie_id: UUID
+    user_id: UUID
+    bookmarked_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     class Settings:
         name = "user_bookmarks"
-
-    class Config:
-        arbitrary_types_allowed = True
-        json_encoders = {PyObjectId: str}
