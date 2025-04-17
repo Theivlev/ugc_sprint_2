@@ -92,6 +92,20 @@ services:
       - jaeger
       - kafka-0
 
+  ugc_fastapi:
+    build:
+      context: ./ugc_fastapi
+      dockerfile: Dockerfile
+    container_name: ugc_fastapi
+    env_file:
+      - ./.env
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    depends_on:
+      - ugc_mongo_db
+
+
   redis:
     image: redislabs/redismod:latest
     container_name: redis
@@ -140,8 +154,17 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
 
+  ugc_mongo_db:
+      image: mongo
+      env_file:
+        - .env
+      restart: always
+      volumes:
+        - ./mongo:/docker-entrypoint-initdb.d
+      ports:
+        - "27017:27017"
 
   zookeeper:
     image: zookeeper:3.8

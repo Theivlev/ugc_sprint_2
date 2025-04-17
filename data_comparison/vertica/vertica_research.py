@@ -1,19 +1,15 @@
-from time import time
-from uuid import uuid4
-from datetime import datetime
 import logging
 import random
+from datetime import datetime
+from time import time
+from uuid import uuid4
 
 from faker import Faker
-from vertica_python import connect, Connection
-from vertica_python.vertica.cursor import Cursor
 from pydantic import BaseModel, Field
+from vertica_python import Connection, connect
+from vertica_python.vertica.cursor import Cursor
 
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 logger.info("Генерация кэша имен, фамилий и email...")
 
@@ -21,7 +17,8 @@ fake: Faker = Faker()
 
 NAMES = [fake.first_name() for _ in range(1000)]
 SURNAMES = [fake.last_name() for _ in range(1000)]
-DOMAINS = ['gmail.com', 'yahoo.com', 'hotmail.com', 'example.com']
+DOMAINS = ["gmail.com", "yahoo.com", "hotmail.com", "example.com"]
+
 
 def generate_email(name, surname):
     return f"{name.lower()}.{surname.lower()}@{random.choice(DOMAINS)}"
@@ -44,7 +41,7 @@ class ConnectionInfo(BaseModel):
 connection_info: ConnectionInfo = ConnectionInfo()
 
 
-logger.info(f'Параметры подключения: {connection_info}')
+logger.info(f"Параметры подключения: {connection_info}")
 connection: Connection = connect(**connection_info.model_dump())
 
 
@@ -70,18 +67,17 @@ def insert_data():
     for batch in range(BATCHES):
         data = [
             (
-            str(uuid4()),
-            random.choice(NAMES),
-            random.choice(SURNAMES),
-            generate_email(random.choice(NAMES), random.choice(SURNAMES)),
-            datetime.now()
+                str(uuid4()),
+                random.choice(NAMES),
+                random.choice(SURNAMES),
+                generate_email(random.choice(NAMES), random.choice(SURNAMES)),
+                datetime.now(),
             )
             for _ in range(BATCH_SIZE)
         ]
 
         cursor.executemany(
-            "INSERT INTO user_data (user_id, name, surname, email, created_at) VALUES (%s, %s, %s, %s, %s)",
-            data
+            "INSERT INTO user_data (user_id, name, surname, email, created_at) VALUES (%s, %s, %s, %s, %s)", data
         )
 
         if (batch + 1) % 100 == 0:
@@ -90,7 +86,7 @@ def insert_data():
     insertion_time: float = time() - start_time
     insertion_speed: float = round(TOTAL / insertion_time, 2)
 
-    logger.info(f'Скорость вставки: {insertion_speed:,} записей/сек')
+    logger.info(f"Скорость вставки: {insertion_speed:,} записей/сек")
 
 
 def read_data():
@@ -105,8 +101,8 @@ def read_data():
     reading_time: float = time() - start_time
     reading_speed: float = round(TOTAL / reading_time, 2)
 
-    logger.info(f'Скорость чтения: {reading_speed:,} записей/сек')
-    logger.info(f'Прочитано записей: {len(result):,}')
+    logger.info(f"Скорость чтения: {reading_speed:,} записей/сек")
+    logger.info(f"Прочитано записей: {len(result):,}")
 
 
 if __name__ == "__main__":
