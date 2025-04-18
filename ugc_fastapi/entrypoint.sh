@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-exec uvicorn src.main:app --reload --host $UVICORN_HOST --port $UVICORN_PORT_SEARCH
+exec uvicorn src.main:app --reload --host $UVICORN_HOST --port $UVICORN_PORT_SOCIAL

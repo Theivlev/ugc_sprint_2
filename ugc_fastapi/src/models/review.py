@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timezone
+from uuid import UUID
 
 from beanie import Document
 from pydantic import Field
@@ -9,10 +10,10 @@ class UserReviews(Document):
     """Модель для коллекции 'user_reviews'."""
 
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    movie_id: PyObjectId
-    user_id: PyObjectId
+    movie_id: UUID
+    user_id: UUID
     review_text: str
-    reviewed_at: datetime = Field(default_factory=datetime.now)
+    reviewed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     class Settings:
         name = "user_reviews"

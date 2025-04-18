@@ -29,20 +29,20 @@ services:
 
 
   fastapi1:
-      build:
-        context: ./fastapi
-        dockerfile: Dockerfile
-      container_name: searchapi_1
-      ports:
-        - "8080:8080"
-      env_file:
-        - .env
-      depends_on:
-        - etl
-        - redis
-        - theatre-db
-        - jaeger
-        - kafka-0
+    build:
+      context: ./fastapi
+      dockerfile: Dockerfile
+    container_name: searchapi_1
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - etl
+      - redis
+      - theatre-db
+      - jaeger
+      - kafka-0
 
   fastapi2:
     build:
@@ -100,7 +100,7 @@ services:
     env_file:
       - ./.env
     ports:
-      - "8080:8080"
+      - "8060:8060"
     restart: unless-stopped
     depends_on:
       - ugc_mongo_db
@@ -141,6 +141,8 @@ services:
       - fastapi1
       - fastapi2
       - fastapi_auth1
+      - fastapi_auth2
+      - ugc_fastapi
     ports:
       - "80:80"
 
