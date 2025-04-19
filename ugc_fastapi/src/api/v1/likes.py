@@ -16,7 +16,7 @@ router = APIRouter()
 
 @router.get(
     "/",
-    response_model=List[UserLikeCreateDTO],
+    response_model=List[UserLikeResponse],
     summary="Получение списка лайков",
     description="Возвращает список лайков",
 )
@@ -28,15 +28,26 @@ async def get_likes_films(
     """
     Получить список лайков.
     """
-    page_number, page_size = pagination
-    filter_ = {"user_id": UUID(user_id)}
-    likes = await service.find(filter_, page_number, page_size)
-    return [UserLikeResponse.from_user_like(like) for like in likes]
+    try:
+
+        uuid_obj = UUID(user_id)
+        page_number, page_size = pagination
+
+        filter_ = {"user_id": uuid_obj}
+        likes = await service.find(filter_, page_number, page_size)
+
+        return [UserLikeResponse.from_user_like(like) for like in likes]
+    except HTTPException as e:
+        raise e
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Некорректный формат user_id. Ожидается UUID.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
 
 @router.get(
     "/{like_id}",
-    response_model=UserLikeCreateDTO,
+    response_model=UserLikeResponse,
     summary="Получение лайка",
     description="Возвращает лайк",
 )
@@ -47,10 +58,19 @@ async def get_like_films(
     """
     Получить лайк.
     """
-    like = await service.get(like_id)
-    if not like:
-        raise HTTPException(status_code=404, detail="Лайк не найден")
-    return UserLikeResponse.from_user_like(like)
+    try:
+        like = await service.get(like_id)
+        if not like:
+            raise HTTPException(status_code=404, detail="Лайк не найден")
+
+        return UserLikeResponse.from_user_like(like)
+
+    except HTTPException as e:
+        raise e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Некорректный формат like_id: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
 
 @router.post(
@@ -63,11 +83,20 @@ async def add_likes_films(
     like_data: UserLikeCreateDTO,
     service: BaseMongoCRUD = Depends(get_likes_service),
 ):
+    """
+    Добавить лайк.
+    """
     try:
+
         new_like = await service.create(like_data.model_dump(by_alias=True))
         return new_like
+
     except DuplicateKeyError:
         raise HTTPException(status_code=400, detail="Лайк уже существует")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Некорректные данные: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
 
 @router.delete(
@@ -80,10 +109,19 @@ async def remove_like(
     like: UserLikes = Depends(validate_like_exists),
     service: BaseMongoCRUD = Depends(get_likes_service),
 ):
-    success = await service.delete(str(like.id))
-    if not success:
-        raise HTTPException(status_code=404, detail="Лайк не найден")
-    return {"message": "Лайк успешно удален"}
+    """
+    Удалить лайк.
+    """
+    try:
+        success = await service.delete(str(like.id))
+        if not success:
+            raise HTTPException(status_code=404, detail="Лайк не найден")
+        return {"message": "Лайк успешно удален"}
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
 
 @router.put(
@@ -97,8 +135,15 @@ async def update_like(
     like: UserLikes = Depends(validate_like_exists),
     service: BaseMongoCRUD = Depends(get_likes_service),
 ):
-    data = {"rating": rating}
-    success = await service.update(str(like.id), data)
-    if not success:
-        raise HTTPException(status_code=404, detail="Лайк не найден")
-    return {"message": "Лайк успешно обновлен"}
+    try:
+        data = {"rating": rating}
+        success = await service.update(str(like.id), data)
+        if not success:
+            raise HTTPException(status_code=404, detail="Лайк не найден")
+        return {"message": "Лайк успешно обновлен"}
+    except HTTPException as e:
+        raise e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Некорректные данные: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
