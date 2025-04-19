@@ -6,7 +6,7 @@ from src.api.routers import main_router
 from src.core.config import project_settings
 from src.db.mongo import init_db
 
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status # noqa
 
 
 @asynccontextmanager

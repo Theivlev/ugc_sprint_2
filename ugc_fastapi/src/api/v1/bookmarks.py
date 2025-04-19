@@ -4,10 +4,10 @@ from uuid import UUID
 from pymongo.errors import DuplicateKeyError
 from src.crud.base import BaseMongoCRUD
 from src.models.bookmark import UserBookmarks
+from src.paginations.pagination import PaginationLimits
 from src.services.bookmarks import get_bookmark_service
 from src.shemas.user_bookmarks import UserBookmarkCreateDTO, UserBookmarkResponse
 from src.utils.check_bookmark import validate_bookmark_exists
-from src.paginations.pagination import PaginationLimits
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -34,11 +34,8 @@ async def get_bookmarks_films(
         filter_ = {"user_id": uuid_obj}
 
         bookmarks = await service.find(filter_, page_number, page_size)
+        return [UserBookmarkResponse.from_bookmark(bookmark) for bookmark in bookmarks]
 
-        return [
-            UserBookmarkResponse.from_bookmark(bookmark)
-            for bookmark in bookmarks
-        ]
     except HTTPException as e:
         raise e
     except ValueError:

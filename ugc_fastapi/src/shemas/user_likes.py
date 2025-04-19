@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, validator
 from src.models.dto import AbstractDTO
+from src.models.like import UserLikes
 
 
 class UserLikeCreateDTO(AbstractDTO):
@@ -40,3 +41,13 @@ class UserLikeResponse(BaseModel):
         if value.tzinfo is None:
             return value.replace(tzinfo=timezone.utc)
         return value
+
+    @staticmethod
+    def from_user_like(like: UserLikes) -> "UserLikeResponse":
+        return UserLikeResponse(
+            id=str(like.id),
+            movie_id=str(like.movie_id),
+            user_id=str(like.user_id),
+            liked_at=like.liked_at,
+            rating=like.rating,
+        )
