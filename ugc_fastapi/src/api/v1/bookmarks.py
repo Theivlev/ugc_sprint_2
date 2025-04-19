@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from uuid import UUID
 
 from pymongo.errors import DuplicateKeyError
@@ -7,8 +7,8 @@ from src.models.bookmark import UserBookmarks
 from src.services.bookmarks import get_bookmark_service
 from src.shemas.user_bookmarks import UserBookmarkCreateDTO, UserBookmarkResponse
 from src.utils.check_bookmark import validate_bookmark_exists
-
-from fastapi import APIRouter, Depends, HTTPException, Query
+from src.shemas.pagination import PaginationLimits
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
 
@@ -20,23 +20,18 @@ router = APIRouter()
     description="Возвращает список фильмов в закладках пользователя",
 )
 async def get_bookmarks_films(
-    user_id: str,
-    page_number: int = Query(0, ge=0, description="Номер страницы"),
-    page_size: int = Query(10, ge=1, le=100, description="Размер страницы"),
+    user_id: UUID,
+    pagination: Tuple[int, int] = Depends(PaginationLimits.get_pagination_params),
     service: BaseMongoCRUD = Depends(get_bookmark_service),
 ):
     """
     Получить список фильмов в закладках пользователя.
     """
-    filter_ = {"user_id": UUID(user_id)}
+    page_number, page_size = pagination
+    filter_ = {"user_id": user_id}
     bookmarks = await service.find(filter_, page_number, page_size)
     return [
-        UserBookmarkResponse(
-            id=str(bookmark.id),
-            movie_id=str(bookmark.movie_id),
-            user_id=str(bookmark.user_id),
-            bookmarked_at=bookmark.bookmarked_at,
-        )
+        UserBookmarkResponse.from_bookmark(bookmark)
         for bookmark in bookmarks
     ]
 
