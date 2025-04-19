@@ -29,7 +29,6 @@ async def get_likes_films(
     Получить список лайков.
     """
     try:
-
         uuid_obj = UUID(user_id)
         page_number, page_size = pagination
 
@@ -87,7 +86,6 @@ async def add_likes_films(
     Добавить лайк.
     """
     try:
-
         new_like = await service.create(like_data.model_dump(by_alias=True))
         return new_like
 
