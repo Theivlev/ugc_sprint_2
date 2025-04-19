@@ -2,6 +2,7 @@ from typing import List, Tuple
 from uuid import UUID
 
 from pymongo.errors import DuplicateKeyError
+from fastapi import APIRouter, Depends, HTTPException
 from src.crud.base import BaseMongoCRUD
 from src.models.review import UserReviews
 from src.paginations.pagination import PaginationLimits
@@ -9,14 +10,12 @@ from src.services.reviews import get_reviews_service
 from src.shemas.user_reviews import UserReviewCreateDTO, UserReviewResponse
 from src.utils.check_review import validate_review_exists
 
-from fastapi import APIRouter, Depends, HTTPException
-
 router = APIRouter()
 
 
 @router.get(
     "/",
-    response_model=List[UserReviewCreateDTO],
+    response_model=List[UserReviewResponse],
     summary="Получение списка рецензий",
     description="Возвращает список рецензий",
 )
@@ -28,18 +27,27 @@ async def get_reviews_films(
     """
     Получить список рецензий.
     """
-    page_number, page_size = pagination
-    filter_ = {"user_id": UUID(user_id)}
-    reviews = await service.find(filter_, page_number, page_size)
-    return [
-        UserReviewResponse.from_review(review)
-        for review in reviews
-    ]
+    try:
+        uuid_obj = UUID(user_id)
+
+        page_number, page_size = pagination
+        filter_ = {"user_id": uuid_obj}
+
+        reviews = await service.find(filter_, page_number, page_size)
+
+        return [UserReviewResponse.from_review(review) for review in reviews]
+
+    except HTTPException as e:
+        raise e
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Некорректный формат user_id. Ожидается UUID.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
 
 @router.get(
     "/{review_id}",
-    response_model=UserReviewCreateDTO,
+    response_model=UserReviewResponse,
     summary="Получение рецензии",
     description="Возвращает рецензию",
 )
@@ -50,10 +58,19 @@ async def get_review_films(
     """
     Получить рецензию.
     """
-    review = await service.get(review_id)
-    if not review:
-        raise HTTPException(status_code=404, detail="Рецензия не найдена")
-    return UserReviewResponse.from_review(review)
+    try:
+        review = await service.get(review_id)
+        if not review:
+            raise HTTPException(status_code=404, detail="Рецензия не найдена")
+
+        return UserReviewResponse.from_review(review)
+
+    except HTTPException as e:
+        raise e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Некорректный формат review_id: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
 
 @router.post(
@@ -66,11 +83,19 @@ async def add_reviews_films(
     review_data: UserReviewCreateDTO,
     service: BaseMongoCRUD = Depends(get_reviews_service),
 ):
+    """
+    Добавить рецензию.
+    """
     try:
         new_review = await service.create(review_data.model_dump(by_alias=True))
         return new_review
+
     except DuplicateKeyError:
         raise HTTPException(status_code=400, detail="Рецензия уже существует")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Некорректные данные: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
 
 @router.delete(
@@ -83,10 +108,19 @@ async def remove_review(
     review: UserReviews = Depends(validate_review_exists),
     service: BaseMongoCRUD = Depends(get_reviews_service),
 ):
-    success = await service.delete(str(review.id))
-    if not success:
-        raise HTTPException(status_code=404, detail="Рецензия не найдена")
-    return {"message": "Рецензия успешно удалена"}
+    """
+    Удалить рецензию.
+    """
+    try:
+        success = await service.delete(str(review.id))
+        if not success:
+            raise HTTPException(status_code=404, detail="Рецензия не найдена")
+        return {"message": "Рецензия успешно удалена"}
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
 
 @router.put(
@@ -100,8 +134,22 @@ async def update_review(
     review: UserReviews = Depends(validate_review_exists),
     service: BaseMongoCRUD = Depends(get_reviews_service),
 ):
-    data = {"review_text": review_text}
-    success = await service.update(str(review.id), data)
-    if not success:
-        raise HTTPException(status_code=404, detail="Рецензия не найдена")
-    return {"message": "Рецензия успешно обновлена"}
+    """
+    Обновить рецензию.
+    """
+    try:
+        if not review_text.strip():
+            raise HTTPException(status_code=400, detail="Текст рецензии не может быть пустым")
+
+        data = {"review_text": review_text}
+        success = await service.update(str(review.id), data)
+        if not success:
+            raise HTTPException(status_code=404, detail="Рецензия не найдена")
+        return {"message": "Рецензия успешно обновлена"}
+
+    except HTTPException as e:
+        raise e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Некорректные данные: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
