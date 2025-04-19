@@ -7,7 +7,8 @@ from src.models.bookmark import UserBookmarks
 from src.services.bookmarks import get_bookmark_service
 from src.shemas.user_bookmarks import UserBookmarkCreateDTO, UserBookmarkResponse
 from src.utils.check_bookmark import validate_bookmark_exists
-from src.shemas.pagination import PaginationLimits
+from src.paginations.pagination import PaginationLimits
+
 from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()

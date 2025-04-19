@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from uuid import UUID
 
 from pymongo.errors import DuplicateKeyError
@@ -7,6 +7,7 @@ from src.models.like import UserLikes
 from src.services.likes import get_likes_service
 from src.shemas.user_likes import UserLikeCreateDTO, UserLikeResponse
 from src.utils.check_like import validate_like_exists
+from src.paginations.pagination import PaginationLimits
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -21,13 +22,13 @@ router = APIRouter()
 )
 async def get_likes_films(
     user_id: str,
-    page_number: int = Query(0, ge=0, description="Номер страницы"),
-    page_size: int = Query(10, ge=1, le=100, description="Размер страницы"),
+    pagination: Tuple[int, int] = Depends(PaginationLimits.get_pagination_params),
     service: BaseMongoCRUD = Depends(get_likes_service),
 ):
     """
     Получить список лайков.
     """
+    page_number, page_size = pagination
     filter_ = {"user_id": UUID(user_id)}
     likes = await service.find(filter_, page_number, page_size)
     return [

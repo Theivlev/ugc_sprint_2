@@ -7,7 +7,7 @@ from src.models.review import UserReviews
 from src.services.reviews import get_reviews_service
 from src.shemas.user_reviews import UserReviewCreateDTO, UserReviewResponse
 from src.utils.check_review import validate_review_exists
-from src.shemas.pagination import PaginationLimits
+from src.paginations.pagination import PaginationLimits
 
 from fastapi import APIRouter, Depends, HTTPException
 
