@@ -32,13 +32,7 @@ async def get_reviews_films(
     filter_ = {"user_id": UUID(user_id)}
     reviews = await service.find(filter_, page_number, page_size)
     return [
-        UserReviewResponse(
-            id=str(review.id),
-            movie_id=str(review.movie_id),
-            user_id=str(review.user_id),
-            reviewed_at=review.reviewed_at,
-            review_text=review.review_text,
-        )
+        UserReviewResponse.from_review(review)
         for review in reviews
     ]
 
@@ -59,13 +53,7 @@ async def get_review_films(
     review = await service.get(review_id)
     if not review:
         raise HTTPException(status_code=404, detail="Рецензия не найдена")
-    return UserReviewResponse(
-        id=str(review.id),
-        movie_id=str(review.movie_id),
-        user_id=str(review.user_id),
-        reviewed_at=review.reviewed_at,
-        review_text=review.review_text,
-    )
+    return UserReviewResponse.from_review(review)
 
 
 @router.post(
