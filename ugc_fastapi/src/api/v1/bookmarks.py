@@ -21,20 +21,30 @@ router = APIRouter()
     description="Возвращает список фильмов в закладках пользователя",
 )
 async def get_bookmarks_films(
-    user_id: UUID,
+    user_id: str,
     pagination: Tuple[int, int] = Depends(PaginationLimits.get_pagination_params),
     service: BaseMongoCRUD = Depends(get_bookmark_service),
 ):
     """
     Получить список фильмов в закладках пользователя.
     """
-    page_number, page_size = pagination
-    filter_ = {"user_id": user_id}
-    bookmarks = await service.find(filter_, page_number, page_size)
-    return [
-        UserBookmarkResponse.from_bookmark(bookmark)
-        for bookmark in bookmarks
-    ]
+    try:
+        uuid_obj = UUID(user_id)
+        page_number, page_size = pagination
+        filter_ = {"user_id": uuid_obj}
+
+        bookmarks = await service.find(filter_, page_number, page_size)
+
+        return [
+            UserBookmarkResponse.from_bookmark(bookmark)
+            for bookmark in bookmarks
+        ]
+    except HTTPException as e:
+        raise e
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Некорректный формат user_id. Ожидается UUID.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
 
 @router.post(
@@ -64,7 +74,12 @@ async def remove_bookmark(
     bookmark: UserBookmarks = Depends(validate_bookmark_exists),
     service: BaseMongoCRUD = Depends(get_bookmark_service),
 ):
-    success = await service.delete(str(bookmark.id))
-    if not success:
-        raise HTTPException(status_code=404, detail="Закладка не найдена")
-    return {"message": "Закладка успешно удалена"}
+    try:
+        success = await service.delete(str(bookmark.id))
+        if not success:
+            raise HTTPException(status_code=404, detail="Закладка не найдена")
+        return {"message": "Закладка успешно удалена"}
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
