@@ -1,14 +1,15 @@
-from typing import List
+from typing import List, Tuple
 from uuid import UUID
 
 from pymongo.errors import DuplicateKeyError
 from src.crud.base import BaseMongoCRUD
 from src.models.bookmark import UserBookmarks
+from src.paginations.pagination import PaginationLimits
 from src.services.bookmarks import get_bookmark_service
 from src.shemas.user_bookmarks import UserBookmarkCreateDTO, UserBookmarkResponse
 from src.utils.check_bookmark import validate_bookmark_exists
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
 
@@ -21,24 +22,26 @@ router = APIRouter()
 )
 async def get_bookmarks_films(
     user_id: str,
-    page_number: int = Query(0, ge=0, description="Номер страницы"),
-    page_size: int = Query(10, ge=1, le=100, description="Размер страницы"),
+    pagination: Tuple[int, int] = Depends(PaginationLimits.get_pagination_params),
     service: BaseMongoCRUD = Depends(get_bookmark_service),
 ):
     """
     Получить список фильмов в закладках пользователя.
     """
-    filter_ = {"user_id": UUID(user_id)}
-    bookmarks = await service.find(filter_, page_number, page_size)
-    return [
-        UserBookmarkResponse(
-            id=str(bookmark.id),
-            movie_id=str(bookmark.movie_id),
-            user_id=str(bookmark.user_id),
-            bookmarked_at=bookmark.bookmarked_at,
-        )
-        for bookmark in bookmarks
-    ]
+    try:
+        uuid_obj = UUID(user_id)
+        page_number, page_size = pagination
+        filter_ = {"user_id": uuid_obj}
+
+        bookmarks = await service.find(filter_, page_number, page_size)
+        return [UserBookmarkResponse.from_bookmark(bookmark) for bookmark in bookmarks]
+
+    except HTTPException as e:
+        raise e
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Некорректный формат user_id. Ожидается UUID.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
 
 @router.post(
@@ -68,7 +71,12 @@ async def remove_bookmark(
     bookmark: UserBookmarks = Depends(validate_bookmark_exists),
     service: BaseMongoCRUD = Depends(get_bookmark_service),
 ):
-    success = await service.delete(str(bookmark.id))
-    if not success:
-        raise HTTPException(status_code=404, detail="Закладка не найдена")
-    return {"message": "Закладка успешно удалена"}
+    try:
+        success = await service.delete(str(bookmark.id))
+        if not success:
+            raise HTTPException(status_code=404, detail="Закладка не найдена")
+        return {"message": "Закладка успешно удалена"}
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")

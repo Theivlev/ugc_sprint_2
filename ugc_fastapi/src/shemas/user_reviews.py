@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, validator
 from src.models.dto import AbstractDTO
+from src.models.review import UserReviews
 
 
 class UserReviewCreateDTO(AbstractDTO):
@@ -41,3 +42,13 @@ class UserReviewResponse(BaseModel):
         if value.tzinfo is None:
             return value.replace(tzinfo=timezone.utc)
         return value
+
+    @staticmethod
+    def from_review(review: UserReviews) -> "UserReviewResponse":
+        return UserReviewResponse(
+            id=str(review.id),
+            movie_id=str(review.movie_id),
+            user_id=str(review.user_id),
+            reviewed_at=review.reviewed_at,
+            review_text=review.review_text,
+        )

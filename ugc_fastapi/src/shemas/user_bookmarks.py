@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from pydantic import BaseModel, Field, validator
+from src.models.bookmark import UserBookmarks
 from src.models.dto import AbstractDTO
 
 
@@ -28,3 +29,12 @@ class UserBookmarkResponse(BaseModel):
         if value.tzinfo is None:
             return value.replace(tzinfo=timezone.utc)
         return value
+
+    @staticmethod
+    def from_bookmark(bookmark: UserBookmarks) -> "UserBookmarkResponse":
+        return UserBookmarkResponse(
+            id=str(bookmark.id),
+            movie_id=str(bookmark.movie_id),
+            user_id=str(bookmark.user_id),
+            bookmarked_at=bookmark.bookmarked_at,
+        )
