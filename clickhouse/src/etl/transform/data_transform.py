@@ -2,7 +2,6 @@ import logging
 from typing import AsyncGenerator, List
 
 from aiokafka import ConsumerRecord
-
 from core.base import BaseMessageTranformer
 from models.message import MessageDTO
 

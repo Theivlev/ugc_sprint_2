@@ -1,5 +1,6 @@
 import abc
 from typing import AsyncGenerator, List
+
 from aiokafka import ConsumerRecord
 
 

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   etl:
     build:
@@ -13,8 +11,8 @@ services:
       - theatre-db
       - elasticsearch
       - redis
-
   clickhouse_etl:
+    container_name: clickhouse_etl
     build:
         context: ./clickhouse
         dockerfile: Dockerfile
@@ -25,7 +23,6 @@ services:
         - clickhouse-node2
         - clickhouse-node3
         - clickhouse-node4
-
 
   fastapi1:
     build:
@@ -66,8 +63,40 @@ services:
       context: ./fastapi_auth
       dockerfile: Dockerfile
     container_name: authapi_1
+    command: >
+      bash -c "/opt/app/entrypoint.sh uvicorn src.main:app --reload --host $UVICORN_HOST --port $UVICORN_PORT_AUTH"
+    env_file:
+      - .env
+    depends_on:
+      - etl
+      - redis
+      - theatre-db
+      - jaeger
+      - kafka-0
+  fastapi_auth2:
+    build:
+      context: ./fastapi_auth
+      dockerfile: Dockerfile
+    container_name: authapi_2
+    command: >
+      bash -c "/opt/app/entrypoint.sh uvicorn src.main:app --reload --host $UVICORN_HOST --port $UVICORN_PORT_AUTH"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - theatre-db
+      - jaeger
+      - kafka-0
+
+  grpc_auth:
+    build:
+      context: ./fastapi_auth
+      dockerfile: Dockerfile
+    container_name: grpc_auth
+    command: >
+      bash -c "cd /opt/app && python -m src.auth_server.grpc.grpc_server_entrypoint"
     ports:
-      - "8070:8070"
+      - "50051:50051"
     env_file:
       - .env
     depends_on:
@@ -77,21 +106,18 @@ services:
       - jaeger
       - kafka-0
 
-  fastapi_auth2:
+  ugc_fastapi:
     build:
-      context: ./fastapi_auth
+      context: ./ugc_fastapi
       dockerfile: Dockerfile
-    container_name: authapi_2
-    ports:
-      - "8071:8070"
+    container_name: ugc_fastapi
     env_file:
-      - .env
+      - ./.env
+    ports:
+      - "8060:8060"
+    restart: unless-stopped
     depends_on:
-      - etl
-      - redis
-      - theatre-db
-      - jaeger
-      - kafka-0
+      - ugc_mongo_db
 
   redis:
     image: redislabs/redismod:latest
@@ -130,6 +156,7 @@ services:
       - fastapi2
       - fastapi_auth1
       - fastapi_auth2
+      - ugc_fastapi
     ports:
       - "80:80"
 
@@ -143,8 +170,17 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
 
+  ugc_mongo_db:
+      image: mongo
+      env_file:
+        - .env
+      restart: always
+      volumes:
+        - ./mongo:/docker-entrypoint-initdb.d
+      ports:
+        - "27017:27017"
 
   zookeeper:
     image: zookeeper:3.8

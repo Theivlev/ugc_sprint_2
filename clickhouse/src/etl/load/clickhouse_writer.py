@@ -1,13 +1,13 @@
 import logging
+from dataclasses import dataclass
+from typing import List
 
 from aiochclient import ChClient
 from aiohttp import ClientSession
-
-from dataclasses import dataclass
-from typing import List
-from core.config import settings
 from core.base import BaseWriter
+from core.config import settings
 from models.message import MessageDTO
+
 from .query import QueryBuilder
 
 
@@ -29,8 +29,7 @@ class ClickHouseWriter(BaseWriter):
     async def write(self, rows: List[MessageDTO]):
         try:
             query = self.query_builder.build_insert_query(
-                table_name='data_analytics.event_table',
-                model_class=MessageDTO
+                table_name="data_analytics.event_table", model_class=MessageDTO
             )
             await self.client.execute(query, *rows)
             logging.info("Данные успешно записаны в ClickHouse.")

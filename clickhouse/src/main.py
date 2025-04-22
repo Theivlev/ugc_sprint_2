@@ -1,17 +1,12 @@
 import asyncio
 import logging
 
-
 from etl.extract.kafka_read import KafkaReader
-from etl.transform.data_transform import MessagesTransformer
 from etl.load.clickhouse_writer import ClickHouseWriter
+from etl.transform.data_transform import MessagesTransformer
 from utils.backoff import backoff
 
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 @backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10)
@@ -21,9 +16,7 @@ async def run_etl(writer: ClickHouseWriter, batch_size: int = 10):
 
         try:
             async for messages in reader.read(batch_size):
-                transformed_messages = [
-                    msg async for msg in transformer.transform(messages)
-                ]
+                transformed_messages = [msg async for msg in transformer.transform(messages)]
 
                 if not transformed_messages:
                     logging.warning("Нет данных для записи после трансформации.")

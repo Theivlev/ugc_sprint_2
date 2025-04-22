@@ -1,15 +1,13 @@
 import logging
-from aiokafka import AIOKafkaConsumer
-from typing import AsyncGenerator, List
 from dataclasses import dataclass
-from core.config import settings
+from typing import AsyncGenerator, List
+
+from aiokafka import AIOKafkaConsumer
 from core.base import BaseMessageReader
+from core.config import settings
 
 # Настройка логирования
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 @dataclass

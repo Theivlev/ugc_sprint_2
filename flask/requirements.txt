@@ -8,3 +8,4 @@ pydantic-settings==2.3.4
 python-json-logger==2.0.4
 requests==2.32.3
 sentry-sdk[flask]==0.10.2
+

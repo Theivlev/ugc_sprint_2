@@ -40,11 +40,12 @@ services:
       context: ./fastapi_auth
       dockerfile: Dockerfile
     container_name: authapi_1
-    ports:
-      - "8070:8070"
+    command: >
+      bash -c "/opt/app/entrypoint.sh uvicorn src.main:app --reload --host $UVICORN_HOST --port $UVICORN_PORT_AUTH"
     env_file:
       - .env
     depends_on:
+      - etl
       - redis
       - theatre-db
       - jaeger
@@ -53,23 +54,45 @@ services:
       - movies-net
       - movies-net-outside
 
+
   # fastapi_auth2:
   #   build:
   #     context: ./fastapi_auth
   #     dockerfile: Dockerfile
   #   container_name: authapi_2
-  #   ports:
-  #     - "8071:8070"
+  #   command: >
+  #     bash -c "/opt/app/entrypoint.sh uvicorn src.main:app --reload --host $UVICORN_HOST --port $UVICORN_PORT_AUTH"
   #   env_file:
   #     - .env
   #   depends_on:
   #     - redis
   #     - theatre-db
   #     - jaeger
-      # - kafka-0
+  #     - kafka-0
   #   networks:
   #     - movies-net
-        # - movies-net-outside
+  #     - movies-net-outside
+
+  grpc_auth:
+    build:
+      context: ./fastapi_auth
+      dockerfile: Dockerfile
+    container_name: grpc_auth
+    command: >
+      bash -c "cd /opt/app && python -m src.auth_server.grpc.grpc_server_entrypoint"
+    ports:
+      - "50051:50051"
+    env_file:
+      - .env
+    depends_on:
+      - etl
+      - redis
+      - theatre-db
+      - jaeger
+      - kafka-0
+    networks:
+      - movies-net
+      - movies-net-outside
 
   redis:
     image: redislabs/redismod:latest
