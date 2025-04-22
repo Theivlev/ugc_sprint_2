@@ -8,8 +8,12 @@ from src.paginations.pagination import PaginationLimits
 from src.services.reviews import get_reviews_service
 from src.shemas.user_reviews import UserReviewCreateDTO, UserReviewResponse
 from src.utils.check_review import validate_review_exists
+from src.auth_server.schemas.models import TokenValidationResult    
+from src.auth_server.security import require_valid_token
+from src.utils.security import ensure_user_owns_resource
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.params import Security
 
 router = APIRouter()
 
@@ -83,10 +87,13 @@ async def get_review_films(
 async def add_reviews_films(
     review_data: UserReviewCreateDTO,
     service: BaseMongoCRUD = Depends(get_reviews_service),
+    token_payload: TokenValidationResult = Security(require_valid_token),
 ):
     """
     Добавить рецензию.
     """
+    ensure_user_owns_resource(review_data.user_id, token_payload.user_id, "добавить рецензию")
+
     try:
         new_review = await service.create(review_data.model_dump(by_alias=True))
         return new_review
@@ -108,10 +115,13 @@ async def add_reviews_films(
 async def remove_review(
     review: UserReviews = Depends(validate_review_exists),
     service: BaseMongoCRUD = Depends(get_reviews_service),
+    token_payload: TokenValidationResult = Security(require_valid_token),
 ):
     """
     Удалить рецензию.
     """
+    ensure_user_owns_resource(review.user_id, token_payload.user_id, "удалить рецензию")
+    
     try:
         success = await service.delete(str(review.id))
         if not success:
@@ -134,10 +144,13 @@ async def update_review(
     review_text: str,
     review: UserReviews = Depends(validate_review_exists),
     service: BaseMongoCRUD = Depends(get_reviews_service),
+    token_payload: TokenValidationResult = Security(require_valid_token),
 ):
     """
     Обновить рецензию.
     """
+    ensure_user_owns_resource(review.user_id, token_payload.user_id, "обновить рецензию")
+
     try:
         if not review_text.strip():
             raise HTTPException(status_code=400, detail="Текст рецензии не может быть пустым")

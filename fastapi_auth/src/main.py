@@ -4,7 +4,6 @@ from contextlib import asynccontextmanager
 from fastapi.responses import ORJSONResponse
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from src.api.routers import main_router
-from src.auth_server.grpc.grpc_server import GRPCAuthService
 from src.core.config import jaeger_settings, project_settings, redis_settings
 from src.core.jaeger import configure_tracer
 from src.db.init_postgres import create_first_superuser
@@ -25,10 +24,6 @@ async def lifespan(app: FastAPI):
         await redis_cache_manager.setup()
 
         await rabbitmq_producer.setup()
-        grpc_auth_service = GRPCAuthService(port=project_settings.auth_grpc_port)
-        app.state.grpc_auth_service = grpc_auth_service
-        app.state.fast_server_task = asyncio.create_task(grpc_auth_service.serve())
-
         yield
 
     finally:
