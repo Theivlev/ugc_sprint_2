@@ -26,9 +26,9 @@ class GRPCAuthClient(AbstractAuthClient):
                 )
             except grpc.RpcError as e:
                 logging.error(f"gRPC call error: {e}")
-                return {
-                    "is_valid": False,
-                    "user_id": None,
-                    "is_subscribed": False,
-                    "error_message": str(e),
-                }
+                return TokenValidationResult(
+                    is_valid=False,
+                    user_id=None,
+                    is_subscribed=False,
+                    error_message=str(e),
+                )

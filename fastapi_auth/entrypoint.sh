@@ -6,25 +6,27 @@ python << END
 import time
 import asyncpg
 import asyncio
+import os
 
-async def wait_for_db():
-    while True:
-        try:
-            conn = await asyncpg.connect("postgresql://postgres:qwerty1234@theatre-db:5432/project_collection")
-            await conn.close()
-            break
-        except:
-            print("PostgreSQL is not ready yet. Sleeping...")
-            time.sleep(2)
+dsn = os.environ.get("POSTGRES_DSN")
+if dsn:
+    async def wait_for_db():
+        while True:
+            try:
+                conn = await asyncpg.connect(dsn)
+                await conn.close()
+                break
+            except Exception as e:
+                print(f"PostgreSQL is not ready yet: {e}. Sleeping...")
+                time.sleep(2)
 
-asyncio.run(wait_for_db())
-print("PostgreSQL is up!")
+    asyncio.run(wait_for_db())
+    print("PostgreSQL is up!")
 END
 
-echo "PostgreSQL is up and running!"
-
-echo "Running Alembic migrations..."
-
+# echo "Running Alembic migrations..."
 # alembic upgrade head
 
-exec uvicorn src.main:app --reload --host $UVICORN_HOST --port $UVICORN_PORT_AUTH
+# Запуск переданного процесса (с переменными окружения)
+echo "Starting main process: $@"
+exec "$@"
